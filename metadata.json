@@ -1,0 +1,6 @@
+{
+  "name": "EarthPulse Live",
+  "description": "The World's Largest Free Directory of Live Public Webcams and Virtual Exploration. Stream street, beach, traffic, sky, and wildlife cameras worldwide.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
