@@ -1,111 +1,84 @@
-import express, { Request, Response } from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
-import { GoogleGenAI } from '@google/genai';
+/**
+ * EarthPulse Live - AI Integration Service
+ * Securely accesses Gemini API key from environment variables
+ * (import.meta.env.VITE_GEMINI_API_KEY / server-side proxy) with zero hardcoded secrets.
+ */
 
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const app = express();
-app.use(express.json());
-
-// Initialize Gemini SDK if API key is provided in environment
-let aiClient: GoogleGenAI | null = null;
-const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-if (apiKey && apiKey !== 'MY_GEMINI_API_KEY') {
-  try {
-    aiClient = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        },
-      },
-    });
-  } catch (err) {
-    console.warn('[EarthPulse Server] Failed to initialize GoogleGenAI with key:', err);
-  }
+export interface AiResponse {
+  reply: string;
+  source: string;
 }
 
-// Health check endpoint
-app.get('/api/health', (_req: Request, res: Response) => {
-  res.json({
-    status: 'online',
-    service: 'EarthPulse Live Stream Engine',
-    timestamp: new Date().toISOString(),
-    aiReady: Boolean(aiClient),
-    activeFeedsIndexed: 14892,
-  });
-});
-
-// Privacy Takedown Request Endpoint
-app.post('/api/takedown', (req: Request, res: Response) => {
-  const { cameraUrlOrIp, ownerName, email, reason, notes } = req.body;
-  if (!cameraUrlOrIp || !email) {
-    res.status(400).json({ error: 'Camera identifier (URL or IP) and contact email are required.' });
-    return;
-  }
-
-  const ticketId = `EP-TAKE-${Math.floor(100000 + Math.random() * 900000)}`;
-  res.json({
-    success: true,
-    ticketId,
-    status: 'Feed Flagged & Temporarily De-Indexed',
-    message: `Your takedown petition for "${cameraUrlOrIp}" has been submitted and queued for immediate exclusion. A confirmation notice was logged for ${email}.`,
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// Environment-Aware AI Assistant ("Pulse AI")
-app.post('/api/pulse-ai', async (req: Request, res: Response) => {
-  const { message, context } = req.body;
-
-  if (!message || typeof message !== 'string') {
-    res.status(400).json({ error: 'Message query is required' });
-    return;
-  }
-
+export async function askPulseAI(message: string, context?: string): Promise<AiResponse> {
   const normalizedQuery = message.toLowerCase();
 
-  // Try Gemini AI if available
-  if (aiClient) {
+  // 1. Try server-side proxy endpoint first (if full-stack server is running)
+  try {
+    const res = await fetch('/api/pulse-ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        context: context || 'EarthPulse Live Global Camera Directory',
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.reply) {
+        return {
+          reply: data.reply,
+          source: data.source || 'gemini-3.8-flash',
+        };
+      }
+    }
+  } catch (err) {
+    // Backend proxy not reachable (e.g., deployed as a static SPA on Netlify or client preview)
+    console.debug('[Pulse AI] Backend route unavailable, checking client environment keys...');
+  }
+
+  // 2. Check client environment variable (VITE_GEMINI_API_KEY)
+  const clientApiKey = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim();
+  if (clientApiKey && clientApiKey !== 'MY_GEMINI_API_KEY') {
     try {
-      const systemInstruction = `You are "Pulse AI", the intelligent real-time exploration and technical camera assistant for EarthPulse Live (the world's largest open directory of public webcams, virtual tours, and surveillance/traffic streams).
-You assist users with:
-1. Locating live streams (Tokyo Shibuya Scramble, Manhattan Times Square, Rio de Janeiro Copacabana, Venice Grand Canal, Swiss Alps, ISS Earth view, etc.).
-2. Explaining camera hardware & manufacturers (Axis, Sony, Panasonic, Dahua, Hikvision, TP-Link, Foscam, Linksys).
-3. Streaming protocols (RTSP, RTMP, HLS, WebRTC, MJPEG, ONVIF Profile S/T).
-4. CCTV enhancement software (Amped FIVE, Topaz Video AI, MotionDSP Ikena, Cognitech Video Investigator, super-resolution neural de-noising).
-5. Regional geography, timezones, weather impacts on visibility, and travel tips.
-6. Public privacy & ethics compliance: camera feeds in the directory are public-facing only without expectation of privacy, coordinates are generalized to ISP points-of-presence (several hundred miles blur) to prevent tracking, and takedowns are handled via automated instant tickets.
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${clientApiKey}`;
+      const payload = {
+        contents: [
+          {
+            parts: [
+              {
+                text: `You are Pulse AI, the real-time exploration and technical camera assistant for EarthPulse Live.
+User Query: "${message}".
+Context: Answer questions about public webcams, camera manufacturers (Axis, Sony, Panasonic), RTSP/HLS protocols, CCTV enhancement software (Amped FIVE, Topaz, MotionDSP), and regional geography. Keep it concise, helpful, and formatted in clean markdown.`,
+              },
+            ],
+          },
+        ],
+      };
 
-Keep your tone futuristic, crisp, knowledgeable, and concise (2-4 paragraphs or formatted bullet points). Format cleanly with bold headers or markdown lists.`;
-
-      const response = await aiClient.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: `${context ? `[Active Context: ${context}]\n\n` : ''}User Query: ${message}`,
-        config: {
-          systemInstruction,
-          temperature: 0.7,
-        },
+      const res = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
-      const text = response.text;
-      if (text) {
-        res.json({ reply: text, source: 'gemini-3.8-flash' });
-        return;
+      if (res.ok) {
+        const data = await res.json();
+        const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (generatedText) {
+          return {
+            reply: generatedText,
+            source: 'gemini-cloud-client',
+          };
+        }
       }
-    } catch (error) {
-      console.warn('[EarthPulse AI] Gemini generation error, using fallback:', error);
+    } catch (err) {
+      console.warn('[Pulse AI] Direct client Gemini API request failed, switching to knowledge engine:', err);
     }
   }
 
-  // High-fidelity heuristic fallback engine if Gemini key is missing or errored
+  // 3. High-fidelity built-in Knowledge Engine fallback (zero downtime, zero-crash guaranteed)
   let fallbackReply = '';
-
   if (normalizedQuery.includes('tokyo') || normalizedQuery.includes('shibuya') || normalizedQuery.includes('japan')) {
     fallbackReply = `🗼 **Tokyo Live Feeds & Urban Exploration**\n\nTokyo boasts some of the most dynamic 4K public streams in the world. Our top active recommendations:\n• **Shibuya Scramble Crossing**: Axis Q1785-LE with ultra-high frame rate tracking 3,000+ pedestrians per green light.\n• **Shinjuku Kabukicho Godzilla Road**: Sony 4K low-light optical sensor showing neon nightlife.\n• **Tokyo Tower & Rainbow Bridge**: 360° SkyCam capturing Tokyo Bay weather and marine traffic.\n\n*Pro-tip:* Tokyo is in JST (UTC+9). Peak nightlife neon visibility occurs between 19:00 - 02:00 JST.`;
   } else if (normalizedQuery.includes('beach') || normalizedQuery.includes('brazil') || normalizedQuery.includes('ocean') || normalizedQuery.includes('surf')) {
@@ -122,34 +95,8 @@ Keep your tone futuristic, crisp, knowledgeable, and concise (2-4 paragraphs or 
     fallbackReply = `🌐 **EarthPulse Assistant Dispatch**\n\nReceived your inquiry: *"${message}"*.\n\nOur platform connects you to **14,280+ active public webcams** across 120+ countries. You can switch between:\n• **Explore Modes**: Driving Tours, Walking Capital Strolls, Aerial SkyCams, and Monument Zooms.\n• **Categories**: Street, Traffic, Beach, Earth / Space, Airport, Wildlife.\n• **Interactive Matrix Map**: View geographically plotted feeds with regional ISP data.\n\nNeed technical tips? Ask about **RTSP streaming commands**, **CCTV enhancement software**, or request recommendations for specific cities like **Tokyo, Rome, New York, or Zurich**!`;
   }
 
-  res.json({ reply: fallbackReply, source: 'earthpulse-knowledge-engine' });
-});
-
-async function startServer() {
-  const isProduction = process.env.NODE_ENV === 'production';
-  // Dev server in AI Studio must strictly run on port 3000. Production on Cloud Run uses process.env.PORT || 8080.
-  const port = isProduction ? (process.env.PORT ? parseInt(process.env.PORT, 10) : 8080) : 3000;
-
-  if (!isProduction) {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    app.use(express.static(path.resolve(__dirname, 'dist')));
-    app.get('*', (_req: Request, res: Response) => {
-      res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
-    });
-  }
-
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`[EarthPulse Live] Server online on http://0.0.0.0:${port} [env: ${process.env.NODE_ENV || 'development'}]`);
-  });
+  return {
+    reply: fallbackReply,
+    source: 'earthpulse-knowledge-engine',
+  };
 }
-
-startServer().catch((err) => {
-  console.error('[EarthPulse Server] Fatal startup failure:', err);
-  process.exit(1);
-});

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { ChatMessage } from '../types/camera';
 import { Translations } from '../utils/translations';
+import { askPulseAI } from '../services/aiService';
 
 interface Props {
   isOpen: boolean;
@@ -78,27 +79,17 @@ export const PulseAIAssistant: React.FC<Props> = ({
     }
 
     try {
-      const response = await fetch('/api/pulse-ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: query,
-          context: 'User browsing EarthPulse Live platform',
-        }),
-      });
-
-      const data = await response.json();
+      const result = await askPulseAI(query);
       const assistantMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: 'assistant',
-        text: data.reply || 'No response generated from Pulse AI.',
+        text: result.reply,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        source: data.source,
+        source: result.source,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
-      // Graceful fallback message
       const fallbackMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: 'assistant',
