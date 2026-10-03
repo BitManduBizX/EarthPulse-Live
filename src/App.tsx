@@ -107,7 +107,39 @@ export default function App() {
       // Search query filter
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchesQuery =
+
+        // Semantic keyword routing for core CCTV queries
+        const isGenericDiscoveryQuery = 
+          q.includes('free cctv') || 
+          q.includes('free camera') || 
+          q.includes('online cameras') || 
+          q.includes('biggest online') ||
+          q.includes('live stream online') ||
+          q.includes('live camera online');
+
+        const isDownloadQuery = q.includes('download');
+        const isEnhancementQuery = q.includes('enhanc');
+        const isStreetQuery = q.includes('street');
+        const isEarthCamQuery = q.includes('earth cam');
+        const isHomeQuery = q.includes('home');
+        const isNearMeQuery = q.includes('near me');
+
+        let matchesSemantic = false;
+        if (isDownloadQuery) {
+          // All feeds support snapshot download, prioritize high-res feeds
+          matchesSemantic = cam.resolution.includes('4K') || cam.resolution.includes('2K');
+        } else if (isEnhancementQuery) {
+          // Feeds with high-end optical sensors
+          matchesSemantic = ['Axis', 'Sony', 'Panasonic', 'Hikvision'].includes(cam.manufacturer);
+        } else if (isStreetQuery) {
+          matchesSemantic = cam.category === 'street' || cam.category === 'road';
+        } else if (isEarthCamQuery) {
+          matchesSemantic = cam.category === 'earth_space' || cam.isFeatured === true;
+        } else if (isHomeQuery || isNearMeQuery || isGenericDiscoveryQuery) {
+          matchesSemantic = true;
+        }
+
+        const matchesStandard =
           cam.title.toLowerCase().includes(q) ||
           cam.city.toLowerCase().includes(q) ||
           cam.country.toLowerCase().includes(q) ||
@@ -117,7 +149,7 @@ export default function App() {
           cam.ispRegion.toLowerCase().includes(q) ||
           cam.timezone.toLowerCase().includes(q);
 
-        if (!matchesQuery) return false;
+        if (!matchesStandard && !matchesSemantic) return false;
       }
 
       // Category filter
@@ -296,6 +328,10 @@ export default function App() {
           isOpen={isAiOpen}
           onClose={() => setIsAiOpen(false)}
           t={t}
+          activeView={activeView}
+          selectedCategory={selectedCategory}
+          selectedManufacturer={selectedManufacturer}
+          modalCamera={modalCamera}
           onSearchTrigger={(q) => {
             setSearchQuery(q);
             setActiveView('gallery');

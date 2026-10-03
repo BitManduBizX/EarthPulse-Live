@@ -117,8 +117,8 @@ export const InteractiveMap: React.FC<Props> = ({ cameras, onSelectCamera, t }) 
           <h2 className="text-lg md:text-xl font-bold text-slate-900 flex items-center gap-2">
             <MapPin className="w-5 h-5 text-emerald-600" />
             <span>Interactive Surveillance Map</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono font-bold border border-emerald-200">
-              {cameras.length} Active Nodes
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono font-bold border border-emerald-200">
+              22 Active Nodes Geographic Feed Distribution
             </span>
           </h2>
           <p className="text-xs text-slate-500 font-mono mt-0.5">

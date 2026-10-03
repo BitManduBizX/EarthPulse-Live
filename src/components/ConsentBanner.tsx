@@ -85,17 +85,17 @@ export const ConsentBanner: React.FC<Props> = ({
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
               <Eye className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-slate-900 block font-semibold">1. Filtered Public Streams</strong>
-                <span className="text-slate-500 leading-normal">Only feeds in public view with zero reasonable expectation of privacy are indexed.</span>
+                <strong className="text-slate-900 block font-semibold">1. Filtered Feeds Only</strong>
+                <span className="text-slate-500 leading-normal">Only non-private, public-facing feeds are listed to ensure zero invasion of private life.</span>
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-slate-900 block font-semibold">2. Rapid Takedown</strong>
+                <strong className="text-slate-900 block font-semibold">2. Prompt Takedown Protocol</strong>
                 <span className="text-slate-500 leading-normal">
-                  Immediate de-indexing upon complaint.{' '}
+                  Any camera will be removed immediately upon complaint.{' '}
                   <button onClick={onOpenTakedownModal} className="text-emerald-600 underline font-medium cursor-pointer">
                     Request removal
                   </button>
@@ -106,16 +106,16 @@ export const ConsentBanner: React.FC<Props> = ({
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
               <Lock className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-slate-900 block font-semibold">3. Password Protection</strong>
-                <span className="text-slate-500 leading-normal">Assigning a password instantly excludes any network camera from indexing.</span>
+                <strong className="text-slate-900 block font-semibold">3. Password Removal</strong>
+                <span className="text-slate-500 leading-normal">Setting a password on your camera automatically removes it from the directory index.</span>
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
               <MapPin className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-slate-900 block font-semibold">4. Approximate Geolocation</strong>
-                <span className="text-slate-500 leading-normal">GPS coordinates are blurred up to hundreds of miles to the nearest ISP node.</span>
+                <strong className="text-slate-900 block font-semibold">4. Approximate Coordinates</strong>
+                <span className="text-slate-500 leading-normal">Coordinates point strictly to the ISP region (accurate only to a few hundred miles) to establish the city, never the physical home/office address.</span>
               </div>
             </div>
           </div>

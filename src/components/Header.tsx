@@ -30,18 +30,40 @@ interface Props {
 }
 
 const autoSuggestOptions = [
-  { label: 'Tokyo, Japan', type: 'City', query: 'Tokyo' },
-  { label: 'New York, US', type: 'City', query: 'New York' },
-  { label: 'Venice, Italy', type: 'City', query: 'Venice' },
-  { label: 'Rio de Janeiro, Brazil', type: 'City', query: 'Rio de Janeiro' },
-  { label: 'Axis Communications', type: 'Manufacturer', query: 'Axis' },
-  { label: 'Sony STARVIS Cameras', type: 'Manufacturer', query: 'Sony' },
-  { label: 'Panasonic i-PRO', type: 'Manufacturer', query: 'Panasonic' },
-  { label: 'Hikvision ColorVu', type: 'Manufacturer', query: 'Hikvision' },
-  { label: 'Copacabana & Waikiki Beaches', type: 'Category', query: 'Beach' },
-  { label: 'Airport Runways & Aprons', type: 'Category', query: 'Airport' },
-  { label: 'International Space Station (ISS)', type: 'Special', query: 'ISS' },
-  { label: 'Traffic & Highways', type: 'Category', query: 'Traffic' },
+  // Core Search Keywords
+  { label: 'free cctv footage live', type: 'Live Stream', query: 'free cctv footage live' },
+  { label: 'free cctv footage download', type: 'Download', query: 'free cctv footage download' },
+  { label: 'free cctv footage live near me', type: 'Nearby', query: 'free cctv footage live near me' },
+  { label: 'free cctv footage enhancement software', type: 'Software', query: 'free cctv footage enhancement software' },
+  { label: 'free cctv footage enhancer', type: 'Forensics', query: 'free cctv footage enhancer' },
+  { label: 'free cctv footage live online', type: 'Online', query: 'free cctv footage live online' },
+  { label: 'free camera footage', type: 'Footage', query: 'free camera footage' },
+  { label: 'free cctv cameras', type: 'Directory', query: 'free cctv cameras' },
+  { label: 'world biggest online cameras directory', type: 'Directory', query: 'world biggest online cameras directory' },
+  { label: 'live street cameras', type: 'Street', query: 'live street cameras' },
+  { label: 'webcam live stream online', type: 'Live', query: 'webcam live stream online' },
+  { label: 'live camera home', type: 'Public', query: 'live camera home' },
+  { label: 'live camera online', type: 'Webcam', query: 'live camera online' },
+  { label: 'earth cam', type: 'Earth / Space', query: 'earth cam' },
+
+  // Indexed Manufacturers
+  { label: 'Axis Communications (Sweden)', type: 'Manufacturer', query: 'Axis' },
+  { label: 'Panasonic i-PRO (Japan)', type: 'Manufacturer', query: 'Panasonic' },
+  { label: 'Sony STARVIS Exmor (Japan)', type: 'Manufacturer', query: 'Sony' },
+  { label: 'Linksys Wireless IP Cams', type: 'Manufacturer', query: 'Linksys' },
+  { label: 'TP-Link VIGI Surveillance', type: 'Manufacturer', query: 'TP-Link' },
+  { label: 'Foscam Weatherproof Security', type: 'Manufacturer', query: 'Foscam' },
+  { label: 'Dahua WizSense AI Cams', type: 'Manufacturer', query: 'Dahua' },
+  { label: 'Hikvision ColorVu Starlight', type: 'Manufacturer', query: 'Hikvision' },
+
+  // Notable Cities & Landmarks
+  { label: 'Tokyo Shibuya Scramble, Japan', type: 'City', query: 'Tokyo' },
+  { label: 'New York Times Square, US', type: 'City', query: 'New York' },
+  { label: 'Venice Grand Canal, Italy', type: 'City', query: 'Venice' },
+  { label: 'Rio Copacabana Beach, Brazil', type: 'Beach', query: 'Rio de Janeiro' },
+  { label: 'San Francisco Golden Gate, US', type: 'Monument', query: 'San Francisco' },
+  { label: 'International Space Station (ISS)', type: 'Orbit Cam', query: 'ISS' },
+  { label: 'Zurich Kloten Airport, Switzerland', type: 'Airport', query: 'Zurich' },
 ];
 
 export const Header: React.FC<Props> = ({

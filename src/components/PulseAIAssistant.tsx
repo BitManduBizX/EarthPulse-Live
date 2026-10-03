@@ -1,20 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Sparkles,
   X,
   Send,
   Loader2,
   Trash2,
-  HelpCircle,
-  Camera,
-  Cpu,
-  ShieldCheck,
   Minimize2,
   Maximize2,
   Bot,
   User,
+  Radio,
+  Camera,
 } from 'lucide-react';
-import { ChatMessage } from '../types/camera';
+import { CameraFeed, ChatMessage } from '../types/camera';
 import { Translations } from '../utils/translations';
 import { askPulseAI } from '../services/aiService';
 
@@ -23,6 +21,10 @@ interface Props {
   onClose: () => void;
   t: Translations;
   onSearchTrigger?: (query: string) => void;
+  activeView?: string;
+  selectedCategory?: string;
+  selectedManufacturer?: string;
+  modalCamera?: CameraFeed | null;
 }
 
 export const PulseAIAssistant: React.FC<Props> = ({
@@ -30,6 +32,10 @@ export const PulseAIAssistant: React.FC<Props> = ({
   onClose,
   t,
   onSearchTrigger,
+  activeView = 'gallery',
+  selectedCategory = 'all',
+  selectedManufacturer = '',
+  modalCamera = null,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -44,13 +50,31 @@ export const PulseAIAssistant: React.FC<Props> = ({
   const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const quickPrompts = [
-    'Show me live feeds in Tokyo',
-    'Find beach cams in Brazil',
-    'What is CCTV enhancement software?',
-    'Explain RTSP & ONVIF protocols',
-    'Compare Axis vs Sony cameras',
-  ];
+  // Dynamic context-aware quick prompts
+  const quickPrompts = useMemo(() => {
+    const list: string[] = [];
+
+    if (modalCamera) {
+      list.push(`Explain ${modalCamera.model} optics`);
+      list.push(`Weather & time in ${modalCamera.city}`);
+    } else if (selectedManufacturer) {
+      list.push(`Best settings for ${selectedManufacturer} cams`);
+      list.push(`RTSP bitrate on ${selectedManufacturer}`);
+    } else if (activeView === 'explore') {
+      list.push('Explain 4K 60fps urban driving tours');
+      list.push('Walking tour camera steadicam rigs');
+    }
+
+    list.push(
+      'What is CCTV enhancement software?',
+      'Explain RTSP & ONVIF protocols',
+      'Show me live feeds in Tokyo',
+      'Find beach cams in Brazil',
+      'Compare Axis vs Sony cameras'
+    );
+
+    return list.slice(0, 6);
+  }, [modalCamera, selectedManufacturer, activeView]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -79,7 +103,11 @@ export const PulseAIAssistant: React.FC<Props> = ({
     }
 
     try {
-      const result = await askPulseAI(query);
+      const contextString = `Active Mode: ${activeView}, Category: ${selectedCategory}, Manufacturer: ${selectedManufacturer || 'all'}${
+        modalCamera ? `, Active Camera: ${modalCamera.title} in ${modalCamera.city}, ${modalCamera.country} (${modalCamera.model})` : ''
+      }`;
+
+      const result = await askPulseAI(query, contextString);
       const assistantMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: 'assistant',
@@ -135,8 +163,13 @@ export const PulseAIAssistant: React.FC<Props> = ({
                 <span className="font-bold text-sm text-white">Pulse AI</span>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               </div>
-              <p className="text-[10px] text-slate-400 font-mono">
-                OPTICAL & GEOGRAPHIC INTELLIGENCE
+              <p className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
+                <span>ENVIRONMENT-AWARE AGENT</span>
+                {modalCamera && (
+                  <span className="text-emerald-400 font-bold truncate max-w-[140px]">
+                    // {modalCamera.city}
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -167,6 +200,17 @@ export const PulseAIAssistant: React.FC<Props> = ({
 
         {!isMinimized && (
           <>
+            {/* Context Badge if active */}
+            {(modalCamera || selectedManufacturer || activeView !== 'gallery') && (
+              <div className="px-3.5 py-1.5 bg-emerald-50/90 border-b border-emerald-200/80 text-[10px] font-mono text-emerald-800 flex items-center justify-between shrink-0">
+                <span className="flex items-center gap-1 font-bold">
+                  <Radio className="w-3 h-3 text-emerald-600 animate-pulse" />
+                  CONTEXT: {modalCamera ? `${modalCamera.city} (${modalCamera.manufacturer})` : selectedManufacturer ? `${selectedManufacturer} Feeds` : `${activeView.toUpperCase()} MODE`}
+                </span>
+                <span className="text-slate-500">Live Sensory Sync</span>
+              </div>
+            )}
+
             {/* Messages Body */}
             <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-slate-50 text-xs">
               {messages.map((msg) => {

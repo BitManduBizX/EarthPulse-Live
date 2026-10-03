@@ -35,12 +35,12 @@ export const PrivacyNoticeModal: React.FC<Props> = ({ isOpen, onClose, onOpenTak
 
         <div className="prose prose-slate max-w-none text-sm space-y-4">
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 leading-relaxed text-slate-700 italic">
-            &ldquo;Welcome to EarthPulse Live. The world&apos;s largest open directory of public online video webcams. Select a country to watch live street, traffic, parking, office, road, beach, and weather webcams.&rdquo;
+            &ldquo;Welcome to EarthPulse Live. The world&apos;s largest online directory of open public surveillance security cameras. Select a country to watch live street, traffic, parking, office, road, beach, and earth online webcams. Search network video cams available online without a password. All browsers are supported.&rdquo;
           </div>
 
           <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 pt-2">
             <FileCheck className="w-5 h-5 text-emerald-600" />
-            Mandatory Privacy Protection Protocols
+            Protection of Individual Privacy
           </h3>
 
           <div className="space-y-3.5">
@@ -51,7 +51,7 @@ export const PrivacyNoticeModal: React.FC<Props> = ({ isOpen, onClose, onOpenTak
               <div className="space-y-1">
                 <strong className="text-slate-900 font-semibold block">Filtered Feeds Only</strong>
                 <p className="text-slate-600 text-xs leading-relaxed">
-                  Only public streams with no expectation of personal privacy are listed. Feeds located in residential interiors, private yards, or areas with privacy expectations are strictly barred from indexing.
+                  Only non-private, public-facing feeds are listed to ensure zero invasion of private life. Feeds located in private residences or private offices are excluded.
                 </p>
               </div>
             </div>
@@ -61,9 +61,9 @@ export const PrivacyNoticeModal: React.FC<Props> = ({ isOpen, onClose, onOpenTak
                 2
               </div>
               <div className="space-y-1">
-                <strong className="text-slate-900 font-semibold block">Takedown Request Guarantee</strong>
+                <strong className="text-slate-900 font-semibold block">Prompt Takedown Protocol</strong>
                 <p className="text-slate-600 text-xs leading-relaxed">
-                  Any feed reported via our automated takedown system will be reviewed and removed immediately without bureaucracy or cost.
+                  Any camera will be removed immediately upon email complaint containing a direct stream URL.
                 </p>
               </div>
             </div>
@@ -73,9 +73,9 @@ export const PrivacyNoticeModal: React.FC<Props> = ({ isOpen, onClose, onOpenTak
                 3
               </div>
               <div className="space-y-1">
-                <strong className="text-slate-900 font-semibold block">Password Protection Exclusion</strong>
+                <strong className="text-slate-900 font-semibold block">Password Removal</strong>
                 <p className="text-slate-600 text-xs leading-relaxed">
-                  Setting a password on any network camera automatically and permanently excludes it from all search crawlers, spiders, and directory indexing.
+                  Setting a password on your camera automatically removes it from the directory index.
                 </p>
               </div>
             </div>
@@ -85,9 +85,9 @@ export const PrivacyNoticeModal: React.FC<Props> = ({ isOpen, onClose, onOpenTak
                 4
               </div>
               <div className="space-y-1">
-                <strong className="text-slate-900 font-semibold block">Approximate Geolocation Blurring</strong>
+                <strong className="text-slate-900 font-semibold block">Approximate Coordinates</strong>
                 <p className="text-slate-600 text-xs leading-relaxed">
-                  Camera coordinates are intentionally generalized to the nearest ISP regional point-of-presence (accurate only to several hundred miles) to prevent physical tracking or pinpointing.
+                  Coordinates point strictly to the ISP region (accurate only to a few hundred miles) to establish the city, never the physical home/office address.
                 </p>
               </div>
             </div>

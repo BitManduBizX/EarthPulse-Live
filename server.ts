@@ -85,7 +85,7 @@ You assist users with:
 Keep your tone futuristic, crisp, knowledgeable, and concise (2-4 paragraphs or formatted bullet points). Format cleanly with bold headers or markdown lists.`;
 
       const response = await aiClient.models.generateContent({
-        model: 'gemini-3.8-flash',
+        model: 'gemini-2.5-flash',
         contents: `${context ? `[Active Context: ${context}]\n\n` : ''}User Query: ${message}`,
         config: {
           systemInstruction,
@@ -95,7 +95,7 @@ Keep your tone futuristic, crisp, knowledgeable, and concise (2-4 paragraphs or 
 
       const text = response.text;
       if (text) {
-        res.json({ reply: text, source: 'gemini-3.8-flash' });
+        res.json({ reply: text, source: 'gemini-2.5-flash' });
         return;
       }
     } catch (error) {
@@ -127,8 +127,10 @@ Keep your tone futuristic, crisp, knowledgeable, and concise (2-4 paragraphs or 
 
 async function startServer() {
   const isProduction = process.env.NODE_ENV === 'production';
-  // Dev server in AI Studio must strictly run on port 3000. Production on Cloud Run uses process.env.PORT || 8080.
-  const port = isProduction ? (process.env.PORT ? parseInt(process.env.PORT, 10) : 8080) : 3000;
+  // Parse command-line args if dev server passes --port
+  const portArgIdx = process.argv.indexOf('--port');
+  const cliPort = portArgIdx !== -1 && process.argv[portArgIdx + 1] ? parseInt(process.argv[portArgIdx + 1], 10) : undefined;
+  const PORT = cliPort || (process.env.PORT ? parseInt(process.env.PORT, 10) : (isProduction ? 8080 : 3000));
 
   if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
@@ -144,8 +146,8 @@ async function startServer() {
     });
   }
 
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`[EarthPulse Live] Server online on http://0.0.0.0:${port} [env: ${process.env.NODE_ENV || 'development'}]`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
   });
 }
 
